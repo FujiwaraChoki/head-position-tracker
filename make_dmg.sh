@@ -31,6 +31,14 @@ hdiutil create \
     -ov \
     "$DMG" >/dev/null
 
+# Sign the disk image itself with the same Developer ID, when one is configured.
+SIGN_ID="${CODESIGN_IDENTITY:--}"
+if [ "$SIGN_ID" != "-" ]; then
+  echo "▸ Signing ${DMG} (Developer ID)…"
+  codesign --force --timestamp --sign "$SIGN_ID" "$DMG"
+  codesign --verify --verbose=2 "$DMG"
+fi
+
 SIZE="$(du -h "$DMG" | cut -f1)"
 echo "✓ Built ${DMG} (${SIZE})"
 echo "  Open it, then drag PostureTimer to Applications."

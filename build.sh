@@ -32,9 +32,18 @@ else
   echo "  (no AppIcon.icns — run ./make_icon.sh to generate one)"
 fi
 
-echo "▸ Code-signing (ad-hoc)…"
-codesign --force --sign - --timestamp=none "$APP" >/dev/null 2>&1 || \
-  codesign --force --sign - "$APP"
+# Set CODESIGN_IDENTITY to a "Developer ID Application: …" identity to produce a
+# distributable, hardened-runtime build. Defaults to ad-hoc signing for local use.
+SIGN_ID="${CODESIGN_IDENTITY:--}"
+if [ "$SIGN_ID" = "-" ]; then
+  echo "▸ Code-signing (ad-hoc)…"
+  codesign --force --sign - --timestamp=none "$APP" >/dev/null 2>&1 || \
+    codesign --force --sign - "$APP"
+else
+  echo "▸ Code-signing (Developer ID, hardened runtime)…"
+  codesign --force --options runtime --timestamp --sign "$SIGN_ID" "$APP"
+  codesign --verify --strict --verbose=2 "$APP"
+fi
 
 echo "✓ Built $APP"
 echo "  Run it with:  open $APP"
