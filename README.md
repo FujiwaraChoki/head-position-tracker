@@ -69,7 +69,19 @@ Put your AirPods in first. On the first focus session macOS asks for **Motion & 
 ./make_dmg.sh         # builds the app and produces PostureTimer.dmg
 ```
 
-The app is **ad-hoc signed** (no Developer ID), so the first time you open it from the DMG, right-click → **Open** to get past Gatekeeper.
+By default the app is **ad-hoc signed** (no Developer ID), so the first time you open it from the DMG, right-click → **Open** to get past Gatekeeper.
+
+### Signed & notarized release
+
+To produce a DMG that opens with a normal double-click on any Mac, sign with a Developer ID and notarize. With a `Developer ID Application` certificate and a [`notarytool` keychain profile](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution):
+
+```bash
+CODESIGN_IDENTITY="Developer ID Application: NAME (TEAMID)" \
+NOTARY_PROFILE="posture-notary" \
+./notarize.sh
+```
+
+This signs the app (hardened runtime), notarizes and staples it, builds the DMG around the stapled app, then notarizes and staples the DMG. The [latest release](https://github.com/FujiwaraChoki/head-position-tracker/releases/latest) is built this way.
 
 ## Configure
 
